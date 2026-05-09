@@ -24,12 +24,14 @@ jobs:
       - name: Install Boost via vcpkg
         run: |
           C:\vcpkg\vcpkg install boost:x64-windows-static
-          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows-static" >> $env:GITHUB_ENV
 
-      - name: Fix Boost lib path
+      - name: Setup Boost paths
         run: |
-          New-Item -ItemType Directory -Force "C:\vcpkg\installed\x64-windows-static\lib64-msvc-14.0"
-          Copy-Item "C:\vcpkg\installed\x64-windows-static\lib\*" "C:\vcpkg\installed\x64-windows-static\lib64-msvc-14.0\" -Force
+          New-Item -ItemType Directory -Force "C:\local\boost_1_84_0"
+          Copy-Item "C:\vcpkg\installed\x64-windows-static\include\*" "C:\local\boost_1_84_0\" -Recurse -Force
+          New-Item -ItemType Directory -Force "C:\local\boost_1_84_0\lib64-msvc-14.0"
+          Copy-Item "C:\vcpkg\installed\x64-windows-static\lib\*boost*" "C:\local\boost_1_84_0\lib64-msvc-14.0\" -Force
+          echo "BOOST_ROOT=C:\local\boost_1_84_0" >> $env:GITHUB_ENV
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
