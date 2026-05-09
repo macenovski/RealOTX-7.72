@@ -21,19 +21,21 @@ jobs:
           cd ..
           echo "TFSSDKDir=${{ github.workspace }}\otxsdk\sources\otx-windows-sdk" >> $env:GITHUB_ENV
 
-      - name: Install Boost 1.69 via vcpkg
-        run: |
-          cd C:\vcpkg
-          git fetch --unshallow || true
-          .\vcpkg install boost@1.69.0:x64-windows-static
-          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows-static" >> $env:GITHUB_ENV
+      - name: Install Boost 1.69
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          boost_version: 1.69.0
+          platform_version: 2019
+          toolset: msvc
 
       - name: Setup Boost paths
         run: |
+          $src = "${{ steps.install-boost.outputs.BOOST_ROOT }}"
           New-Item -ItemType Directory -Force "C:\local\boost_1_69_0"
-          Copy-Item "C:\vcpkg\installed\x64-windows-static\include\*" "C:\local\boost_1_69_0\" -Recurse -Force
+          Copy-Item "$src\*" "C:\local\boost_1_69_0\" -Recurse -Force
           New-Item -ItemType Directory -Force "C:\local\boost_1_69_0\lib64-msvc-14.0"
-          Copy-Item "C:\vcpkg\installed\x64-windows-static\lib\*boost*" "C:\local\boost_1_69_0\lib64-msvc-14.0\" -Force
+          Get-ChildItem "$src" -Recurse -Filter "*.lib" | Copy-Item -Destination "C:\local\boost_1_69_0\lib64-msvc-14.0\" -Force
           echo "BOOST_ROOT=C:\local\boost_1_69_0" >> $env:GITHUB_ENV
 
       - name: Add MSBuild to PATH
