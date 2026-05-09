@@ -28,7 +28,6 @@ jobs:
           boost_version: 1.84.0
           platform_version: 2022
           toolset: msvc
-          arch: x86_64
 
       - name: Set Boost env
         run: |
