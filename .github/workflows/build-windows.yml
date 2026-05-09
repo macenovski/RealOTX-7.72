@@ -21,21 +21,15 @@ jobs:
           cd ..
           echo "TFSSDKDir=${{ github.workspace }}\otxsdk\sources\otx-windows-sdk" >> $env:GITHUB_ENV
 
-      - name: Install Boost 1.69
-        uses: MarkusJx/install-boost@v2.4.5
-        id: install-boost
-        with:
-          boost_version: 1.69.0
-          platform_version: 2019
-          toolset: msvc
-
-      - name: Setup Boost paths
+      - name: Download and install Boost 1.69
         run: |
-          $src = "${{ steps.install-boost.outputs.BOOST_ROOT }}"
-          New-Item -ItemType Directory -Force "C:\local\boost_1_69_0"
-          Copy-Item "$src\*" "C:\local\boost_1_69_0\" -Recurse -Force
+          curl -L "https://boostorg.jfrog.io/artifactory/main/release/1.69.0/source/boost_1_69_0.zip" -o boost.zip
+          Expand-Archive boost.zip -DestinationPath C:\local
+          cd C:\local\boost_1_69_0
+          .\bootstrap.bat
+          .\b2.exe address-model=64 variant=release link=static runtime-link=shared --with-system --with-filesystem --with-iostreams --with-thread --with-chrono --with-date_time --with-regex --with-program_options --stagedir=stage64 stage
           New-Item -ItemType Directory -Force "C:\local\boost_1_69_0\lib64-msvc-14.0"
-          Get-ChildItem "$src" -Recurse -Filter "*.lib" | Copy-Item -Destination "C:\local\boost_1_69_0\lib64-msvc-14.0\" -Force
+          Copy-Item "C:\local\boost_1_69_0\stage64\lib\*" "C:\local\boost_1_69_0\lib64-msvc-14.0\" -Force
           echo "BOOST_ROOT=C:\local\boost_1_69_0" >> $env:GITHUB_ENV
 
       - name: Add MSBuild to PATH
