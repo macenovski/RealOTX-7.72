@@ -9,17 +9,17 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - name: Checkout
+      - name: Checkout RealOTX-7.72
         uses: actions/checkout@v4
 
-      - name: Install 7zip
-        run: choco install 7zip -y
-
-      - name: Download OTX Windows SDK
+      - name: Checkout OTX SDK from otxserv2
         run: |
-          curl -L "https://github.com/mattyx14/otxserver/raw/otxserv2/sources/otx-windows-sdk.7z" -o sdk.7z
-          7z x sdk.7z -oC:\otx-sdk
-          echo "TFSSDKDir=C:\otx-sdk\otx-windows-sdk" >> $env:GITHUB_ENV
+          git clone --depth=1 --filter=blob:none --sparse https://github.com/macenovski/otxserver.git otxsdk
+          cd otxsdk
+          git sparse-checkout set sources/otx-windows-sdk
+          git checkout otxserv2
+          cd ..
+          echo "TFSSDKDir=${{ github.workspace }}\otxsdk\sources\otx-windows-sdk" >> $env:GITHUB_ENV
 
       - name: Install Boost
         run: |
