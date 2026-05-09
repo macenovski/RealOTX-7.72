@@ -21,17 +21,15 @@ jobs:
           cd ..
           echo "TFSSDKDir=${{ github.workspace }}\otxsdk\sources\otx-windows-sdk" >> $env:GITHUB_ENV
 
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.5
-        id: install-boost
-        with:
-          boost_version: 1.84.0
-          platform_version: 2022
-          toolset: msvc
-
-      - name: Set Boost env
+      - name: Install Boost via vcpkg
         run: |
-          echo "BOOST_ROOT=${{ steps.install-boost.outputs.BOOST_ROOT }}" >> $env:GITHUB_ENV
+          C:\vcpkg\vcpkg install boost:x64-windows-static
+          echo "BOOST_ROOT=C:\vcpkg\installed\x64-windows-static" >> $env:GITHUB_ENV
+
+      - name: Fix Boost lib path
+        run: |
+          New-Item -ItemType Directory -Force "C:\vcpkg\installed\x64-windows-static\lib64-msvc-14.0"
+          Copy-Item "C:\vcpkg\installed\x64-windows-static\lib\*" "C:\vcpkg\installed\x64-windows-static\lib64-msvc-14.0\" -Force
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
